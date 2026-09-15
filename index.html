@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nahan Obfuscator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000;
+    --bg-elev: #0a0a0a;
+    --bg-elev-2: #111111;
+    --border: #1f1f1f;
+    --border-strong: #2a2a2a;
+    --fg: #ededed;
+    --fg-muted: #8f8f8f;
+    --fg-subtle: #666666;
+    --accent: #ffffff;
+    --blue: #0070f3;
+    --green: #00d47e;
+    --red: #ff4d4d;
+    --amber: #f5a623;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(0, 112, 243, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(0, 212, 126, 0.06), transparent 40%);
+    background-attachment: fixed;
+  }
+
+  /* Top nav */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-logo {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #ffffff 0%, #888 100%);
+    display: grid;
+    place-items: center;
+    color: #000;
+    font-weight: 800;
+    font-size: 12px;
+  }
+
+  .brand-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    color: var(--fg-muted);
+    background: var(--bg-elev);
+    font-family: 'Geist Mono', monospace;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-link {
+    color: var(--fg-muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+
+  .nav-link:hover {
+    color: var(--fg);
+    background: var(--bg-elev);
+  }
+
+  /* Main */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .hero {
+    margin-bottom: 40px;
+    max-width: 720px;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.15;
+  }
+
+  .hero p {
+    color: var(--fg-muted);
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-elev);
+    color: var(--fg);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--bg-elev-2);
+    border-color: #3a3a3a;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #e0e0e0;
+    border-color: #e0e0e0;
+  }
+
+  .btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .spacer { flex: 1; }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'Geist Mono', monospace;
+    color: var(--fg-muted);
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--fg-subtle);
+  }
+
+  .dot.ok { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .dot.err { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .dot.busy { background: var(--amber); animation: pulse 1.2s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 56px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 480px;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elev-2);
+  }
+
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .panel-title .tag {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: var(--fg-subtle);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
+
+  .panel-meta {
+    font-size: 11px;
+    font-family: 'Geist Mono', monospace;
+    color: var(--fg-subtle);
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--fg-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .icon-btn:hover {
+    background: var(--bg-elev-2);
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+
+  .icon-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 400px;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--fg);
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    tab-size: 2;
+  }
+
+  textarea::placeholder {
+    color: var(--fg-subtle);
+  }
+
+  textarea::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  textarea::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  textarea::-webkit-scrollbar-thumb {
+    background: #222;
+    border-radius: 10px;
+    border: 2px solid var(--bg-elev);
+  }
+
+  textarea::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+
+  /* Middle connector */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 12px 0;
+  }
+
+  .connector-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+    z-index: 0;
+  }
+
+  .connector-arrow {
+    position: relative;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    display: grid;
+    place-items: center;
+    color: var(--fg-muted);
+    transition: all 0.3s;
+  }
+
+  .connector-arrow.active {
+    color: var(--blue);
+    border-color: var(--blue);
+    box-shadow: 0 0 20px rgba(0, 112, 243, 0.3);
+  }
+
+  .connector-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .connector-label {
+    position: absolute;
+    bottom: 8px;
+    font-size: 9px;
+    font-family: 'Geist Mono', monospace;
+    color: var(--fg-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  /* Info cards */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .card {
+    padding: 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-family: 'Geist Mono', monospace;
+    color: var(--fg-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .card-value {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .card-value.accent { color: var(--blue); }
+  .card-value.green { color: var(--green); }
+
+  /* Toast */
+  .toast-wrap {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background: #1a1a1a;
+    border: 1px solid var(--border-strong);
+    color: var(--fg);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 0.25s ease-out;
+  }
+
+  .toast.success { border-color: rgba(0, 212, 126, 0.4); }
+  .toast.error { border-color: rgba(255, 77, 77, 0.4); }
+
+  .toast-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .toast.success .toast-dot { background: var(--green); }
+  .toast.error .toast-dot { background: var(--red); }
+  .toast.info .toast-dot { background: var(--blue); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Warning banner */
+  .banner {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(245, 166, 35, 0.06);
+    border: 1px solid rgba(245, 166, 35, 0.2);
+    border-radius: var(--radius);
+    margin-top: 24px;
+    font-size: 12.5px;
+    color: #d0d0d0;
+    line-height: 1.6;
+  }
+
+  .banner-icon {
+    color: var(--amber);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .connector { display: none; }
+    .hero h1 { font-size: 30px; }
+    .info-grid { grid-template-columns: 1fr; }
+    main { padding: 32px 16px 60px; }
+    .nav-inner { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <span>Nahan Obfuscator</span>
+      <span class="brand-badge">v2.5.4.2</span>
+    </div>
+    <div class="nav-actions">
+      <a class="nav-link" href="https://github.com/itsyebekhe/nahan" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="hero">
+    <h1>Obfuscate Cloudflare Workers.</h1>
+    <p>Fetch the latest Nahan worker source from GitHub or paste your own. Imports are hoisted, the payload is XOR-encoded to hex, and a self-contained loader is generated — ready to deploy.</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="fetch-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Fetch latest from GitHub
+    </button>
+    <button class="btn" id="clear-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Clear
+    </button>
+    <button class="btn" id="sample-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      Load sample
+    </button>
+    <div class="spacer"></div>
+    <div class="status-pill">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">idle</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Input -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          Input
+          <span class="tag">_worker.js</span>
+        </div>
+        <div class="panel-actions">
+          <span class="panel-meta" id="input-meta">0 B</span>
+          <button class="icon-btn" id="copy-input" title="Copy input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <textarea id="input" placeholder="// Paste your Cloudflare Worker source here, or click &quot;Fetch latest from GitHub&quot; above." spellcheck="false"></textarea>
+    </div>
+
+    <!-- Connector -->
+    <div class="connector">
+      <div class="connector-line"></div>
+      <div class="connector-arrow" id="connector-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+      <div class="connector-label">xor · hex</div>
+    </div>
+
+    <!-- Output -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          Output
+          <span class="tag">_worker.js</span>
+        </div>
+        <div class="panel-actions">
+          <span class="panel-meta" id="output-meta">0 B</span>
+          <button class="icon-btn" id="copy-output" title="Copy output">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="download-output" title="Download as _worker.js">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <textarea id="output" readonly placeholder="// Obfuscated output will appear here as you type…" spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="card">
+      <div class="card-label">Input size</div>
+      <div class="card-value" id="stat-in">0 B</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Output size</div>
+      <div class="card-value accent" id="stat-out">0 B</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Compression</div>
+      <div class="card-value green" id="stat-ratio">—</div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <svg class="banner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div>
+      <strong style="color:#fff;">Obfuscation ≠ encryption.</strong>
+      The XOR key is embedded alongside the payload, so the output is trivially reversible by any analyst. Use this to satisfy automated scanners, not to protect secrets. Static imports are preserved; dynamic <code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:11px;">import()</code> calls are not rewritten.
+    </div>
+  </div>
+</main>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const GITHUB_RAW_URL =
+    'https://raw.githubusercontent.com/itsyebekhe/nahan/refs/heads/main/_worker.js';
+
+  const els = {
+    input:        document.getElementById('input'),
+    output:       document.getElementById('output'),
+    fetchBtn:     document.getElementById('fetch-btn'),
+    clearBtn:     document.getElementById('clear-btn'),
+    sampleBtn:    document.getElementById('sample-btn'),
+    copyInput:    document.getElementById('copy-input'),
+    copyOutput:   document.getElementById('copy-output'),
+    downloadOut:  document.getElementById('download-output'),
+    connector:    document.getElementById('connector-arrow'),
+    statusDot:    document.getElementById('status-dot'),
+    statusText:   document.getElementById('status-text'),
+    inputMeta:    document.getElementById('input-meta'),
+    outputMeta:   document.getElementById('output-meta'),
+    statIn:       document.getElementById('stat-in'),
+    statOut:      document.getElementById('stat-out'),
+    statRatio:    document.getElementById('stat-ratio'),
+    toasts:       document.getElementById('toasts'),
+  };
+
+  const SAMPLE = `import { handleRequest } from './router.js';
+import defaultExport, { helper as h } from './utils.js';
+import * as net from './net.js';
+
+// Example Cloudflare Worker entrypoint
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname === '/health') {
+      return new Response('ok', { status: 200 });
+    }
+    return handleRequest(request, env, ctx);
+  }
+};`;
+
+  /* ------------------------------------------------------------------ */
+  /*  Import parsing (same logic as the original tool)                  */
+  /* ------------------------------------------------------------------ */
+
+  function parseImportBindings(importStr) {
+    const clean = importStr
+      .replace(/\/\/.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .trim();
+
+    const content = clean
+      .replace(/^import\s+/, '')
+      .replace(/\s+from\s+["'].*?["'];?$/, '')
+      .trim();
+
+    const bindings = [];
+
+    if (content.startsWith('*')) {
+      const m = content.match(/\*\s+as\s+(\w+)/);
+      if (m) bindings.push({ name: m[1], isNamespace: true });
+      return bindings;
+    }
+
+    const braceStart = content.indexOf('{');
+    if (braceStart !== -1) {
+      const defaultPart = content.slice(0, braceStart).replace(/,/, '').trim();
+      if (defaultPart) bindings.push({ name: defaultPart, isDefault: true });
+
+      const bracePart = content.slice(braceStart + 1, content.lastIndexOf('}')).trim();
+      const named = bracePart.split(',').map(s => s.trim()).filter(Boolean);
+      named.forEach(item => {
+        if (item.includes(' as ')) {
+          const parts = item.split(/\s+as\s+/);
+          bindings.push({ name: parts[1], original: parts[0] });
+        } else {
+          bindings.push({ name: item });
+        }
+      });
+    } else {
+      bindings.push({ name: content, isDefault: true });
+    }
+
+    return bindings;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Core obfuscator                                                   */
+  /* ------------------------------------------------------------------ */
+
+  function obfuscate(srcText) {
+    if (!srcText || !srcText.trim()) return '';
+
+    const importRegex = /import\s+[\s\S]*?from\s+["'].*?["'];?/g;
+    const imports = [];
+    let match;
+    while ((match = importRegex.exec(srcText)) !== null) {
+      imports.push(match[0]);
+    }
+
+    let cleanCode = srcText.replace(importRegex, '');
+
+    const bindings = [];
+    imports.forEach(imp => bindings.push(...parseImportBindings(imp)));
+
+    const seen = new Set();
+    const uniqueBindings = [];
+    bindings.forEach(b => {
+      if (!seen.has(b.name)) {
+        seen.add(b.name);
+        uniqueBindings.push(b);
+      }
+    });
+
+    cleanCode = cleanCode.replace(/export\s+default\s+/g, 'const _0xNahanModule = ');
+    cleanCode += '\nreturn _0xNahanModule;';
+
+    const randKey = Math.floor(Math.random() * 80) + 64;
+    const bytes = new TextEncoder().encode(cleanCode);
+
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) {
+      hex += (bytes[i] ^ randKey).toString(16).padStart(2, '0');
+    }
+
+    const rawImportsStr = imports.join('\n');
+    const bindingNames = uniqueBindings.map(b => b.name);
+    const params = bindingNames.map(n => `"${n}"`).join(', ');
+    const args   = bindingNames.join(', ');
+
+    return `${rawImportsStr}
+
+// Nahan Gateway — Obfuscated Loader (v2.5.4.2)
+const _0xNahanPayload = "${hex}";
+const _0xNahanKey = ${randKey};
+
+const _0xNahanBytes = new Uint8Array(
+  (_0xNahanPayload.match(/.{1,2}/g) || []).map(x => parseInt(x, 16) ^ _0xNahanKey)
+);
+const _0xNahanCode = new TextDecoder().decode(_0xNahanBytes);
+const _0xNahanRuntime = new Function(${params}, _0xNahanCode)(${args});
+
+export default _0xNahanRuntime;`;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  UI helpers                                                        */
+  /* ------------------------------------------------------------------ */
+
+  function formatBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function byteLen(str) {
+    return new TextEncoder().encode(str).length;
+  }
+
+  function setStatus(kind, text) {
+    els.statusDot.className = 'dot' + (kind ? ' ' + kind : '');
+    els.statusText.textContent = text;
+  }
+
+  function toast(message, kind = 'info') {
+    const el = document.createElement('div');
+    el.className = 'toast ' + kind;
+    el.innerHTML = `<span class="toast-dot"></span><span>${message}</span>`;
+    els.toasts.appendChild(el);
+    setTimeout(() => {
+      el.style.transition = 'opacity .25s, transform .25s';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(8px)';
+      setTimeout(() => el.remove(), 260);
+    }, 2200);
+  }
+
+  function refreshStats() {
+    const inText  = els.input.value;
+    const outText = els.output.value;
+
+    const inB  = byteLen(inText);
+    const outB = byteLen(outText);
+
+    els.inputMeta.textContent  = formatBytes(inB);
+    els.outputMeta.textContent = formatBytes(outB);
+    els.statIn.textContent     = formatBytes(inB);
+    els.statOut.textContent    = formatBytes(outB);
+
+    if (inB > 0 && outB > 0) {
+      const ratio = ((outB / inB) * 100).toFixed(0);
+      els.statRatio.textContent = ratio + '%';
+    } else {
+      els.statRatio.textContent = '—';
+    }
+  }
+
+  function run() {
+    const src = els.input.value;
+    if (!src.trim()) {
+      els.output.value = '';
+      setStatus('', 'idle');
+      refreshStats();
+      return;
+    }
+
+    try {
+      els.connector.classList.add('active');
+      setStatus('busy', 'obfuscating');
+      const out = obfuscate(src);
+      els.output.value = out;
+      setStatus('ok', 'ready');
+      refreshStats();
+      setTimeout(() => els.connector.classList.remove('active'), 400);
+    } catch (err) {
+      setStatus('err', 'error');
+      toast('Obfuscation failed: ' + err.message, 'error');
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Events                                                            */
+  /* ------------------------------------------------------------------ */
+
+  els.input.addEventListener('input', run);
+
+  els.fetchBtn.addEventListener('click', async () => {
+    els.fetchBtn.disabled = true;
+    const originalLabel = els.fetchBtn.innerHTML;
+    els.fetchBtn.innerHTML = 'Fetching…';
+    setStatus('busy', 'fetching');
+
+    try {
+      const res = await fetch(GITHUB_RAW_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const code = await res.text();
+      els.input.value = code;
+      run();
+      toast('Fetched ' + formatBytes(byteLen(code)) + ' from GitHub', 'success');
+    } catch (err) {
+      setStatus('err', 'fetch failed');
+      toast('Fetch failed: ' + err.message, 'error');
+    } finally {
+      els.fetchBtn.disabled = false;
+      els.fetchBtn.innerHTML = originalLabel;
+    }
+  });
+
+  els.clearBtn.addEventListener('click', () => {
+    els.input.value = '';
+    els.output.value = '';
+    setStatus('', 'idle');
+    refreshStats();
+  });
+
+  els.sampleBtn.addEventListener('click', () => {
+    els.input.value = SAMPLE;
+    run();
+    toast('Sample loaded', 'info');
+  });
+
+  els.copyInput.addEventListener('click', async () => {
+    if (!els.input.value) return;
+    await navigator.clipboard.writeText(els.input.value);
+    toast('Input copied', 'success');
+  });
+
+  els.copyOutput.addEventListener('click', async () => {
+    if (!els.output.value) return;
+    await navigator.clipboard.writeText(els.output.value);
+    toast('Output copied', 'success');
+  });
+
+  els.downloadOut.addEventListener('click', () => {
+    const text = els.output.value;
+    if (!text) return;
+    const blob = new Blob([text], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '_worker.js';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Downloaded _worker.js', 'success');
+  });
+
+  // Keyboard shortcut: Cmd/Ctrl+Enter to re-run
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      run();
+    }
+  });
+
+  refreshStats();
+})();
+</script>
+</body>
+</html>
