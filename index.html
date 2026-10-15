@@ -539,7 +539,7 @@
     <div class="brand">
       <div class="brand-logo">N</div>
       <span>Nahan Obfuscator</span>
-      <span class="brand-badge">v2.5.4.2</span>
+      <span class="brand-badge">v2.5.4.3</span>
     </div>
     <div class="nav-actions">
       <a class="nav-link" href="https://github.com/itsyebekhe/nahan" target="_blank" rel="noopener">GitHub ↗</a>
@@ -550,7 +550,7 @@
 <main>
   <div class="hero">
     <h1>Obfuscate Cloudflare Workers.</h1>
-    <p>Fetch the latest Nahan worker source from GitHub or paste your own. Imports are hoisted, the payload is XOR-encoded to hex, and a self-contained loader is generated — ready to deploy.</p>
+    <p>Fetch the latest Nahan worker source from GitHub or paste your own. Imports are hoisted, the payload is XOR-encoded for reference, and the runtime is emitted as a compiled function — Workers-safe, no <code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:12px;">new Function</code>.</p>
   </div>
 
   <div class="toolbar">
@@ -612,7 +612,7 @@
           <polyline points="12 5 19 12 12 19"/>
         </svg>
       </div>
-      <div class="connector-label">xor · hex</div>
+      <div class="connector-label">hoist · compile</div>
     </div>
 
     <!-- Output -->
@@ -653,7 +653,7 @@
       <div class="card-value accent" id="stat-out">0 B</div>
     </div>
     <div class="card">
-      <div class="card-label">Compression</div>
+      <div class="card-label">Expansion</div>
       <div class="card-value green" id="stat-ratio">—</div>
     </div>
   </div>
@@ -666,7 +666,9 @@
     </svg>
     <div>
       <strong style="color:#fff;">Obfuscation ≠ encryption.</strong>
-      The XOR key is embedded alongside the payload, so the output is trivially reversible by any analyst. Use this to satisfy automated scanners, not to protect secrets. Static imports are preserved; dynamic <code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:11px;">import()</code> calls are not rewritten.
+      The output is emitted as a compiled function because Cloudflare Workers blocks
+      runtime code generation (<code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:11px;">new Function</code> / <code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:11px;">eval</code>).
+      Static imports are preserved; dynamic <code style="font-family:'Geist Mono',monospace;background:#1a1a1a;padding:1px 5px;border-radius:4px;font-size:11px;">import()</code> calls are not rewritten.
     </div>
   </div>
 </main>
@@ -804,17 +806,22 @@ export default {
     const params = bindingNames.map(n => `"${n}"`).join(', ');
     const args   = bindingNames.join(', ');
 
+    // Cloudflare Workers forbids runtime code generation (`new Function` / `eval`).
+    // We emit the decoded code directly as a real function declaration so V8 parses
+    // it at load time. The XOR payload is kept alongside for reference only — it is
+    // not decoded at runtime.
     return `${rawImportsStr}
 
-// Nahan Gateway — Obfuscated Loader (v2.5.4.2)
+// Nahan Gateway — Obfuscated Loader (v2.5.4.3)
+// Runtime emitted as a compiled function; no new Function, no eval.
 const _0xNahanPayload = "${hex}";
 const _0xNahanKey = ${randKey};
 
-const _0xNahanBytes = new Uint8Array(
-  (_0xNahanPayload.match(/.{1,2}/g) || []).map(x => parseInt(x, 16) ^ _0xNahanKey)
-);
-const _0xNahanCode = new TextDecoder().decode(_0xNahanBytes);
-const _0xNahanRuntime = new Function(${params}, _0xNahanCode)(${args});
+function _0xNahanFactory(${params}) {
+${cleanCode}
+}
+
+const _0xNahanRuntime = _0xNahanFactory(${args});
 
 export default _0xNahanRuntime;`;
   }
